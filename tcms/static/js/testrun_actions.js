@@ -61,7 +61,7 @@ Nitrate.TestRuns.Details.on_load = function() {
     var c = jQ(this).parent(); // Container
     var c_container = c.next(); // Content Containers
     var case_id = c.find('input[name="case"]')[0].value;
-    var case_run_id = c.find('input[name="case_run"]')[0].value;
+    var execution_id = c.find('input[name="execution"]')[0].value;
     var case_text_version = c.find('input[name="case_text_version"]')[0].value;
     var type = 'case_run';
     var callback = function(t) {
@@ -78,7 +78,7 @@ Nitrate.TestRuns.Details.on_load = function() {
         }
 
         const comment_id = $(this).find('input[name=comment_id]').val();
-        jsonRPC('TestExecution.remove_comment', [case_run_id, comment_id], function(data) {
+        jsonRPC('TestExecution.remove_comment', [execution_id, comment_id], function(data) {
             constructCaseRunZone(c_container[0], c[0], case_id);
         });
       };
@@ -112,7 +112,7 @@ Nitrate.TestRuns.Details.on_load = function() {
     toggleTestExecutionPane({
       'callback': callback,
       'caseId': case_id,
-      'caserunId': case_run_id,
+      'executionId': execution_id,
       'caseTextVersion': case_text_version,
       'caserunRowContainer': c,
       'expandPaneContainer': c_container
@@ -446,7 +446,7 @@ AddIssueDialog.prototype.get_data = function () {
 //// end of AddIssueDialog definition /////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-function fileCaseRunBug(run_id, title_container, container, case_id, case_run_id) {
+function fileCaseRunBug(run_id, title_container, container, case_id, execution_id) {
   var dialog = new AddIssueDialog({
     'action': 'Report',
     'onSubmit': function (e, dialog) {
@@ -454,7 +454,7 @@ function fileCaseRunBug(run_id, title_container, container, case_id, case_run_id
       e.preventDefault();
 
         var tracker_id = dialog.get_data()['bug_system_id'];
-        jsonRPC('Bug.report', [case_run_id, tracker_id], function(result) {
+        jsonRPC('Bug.report', [execution_id, tracker_id], function(result) {
             $('#dialog').hide();
 
             if (result.rc === 0) {
@@ -472,7 +472,7 @@ function fileCaseRunBug(run_id, title_container, container, case_id, case_run_id
 
 function delCaseRun(run_id) {
     if (window.confirm('Are you sure?')) {
-        const executions = $('#id_table_cases').find('input[name="case_run"]:checked');
+        const executions = $('#id_table_cases').find('input[name="execution"]:checked');
 
         executions.each(function() {
             var case_id = this.getAttribute('data-case_id');
@@ -606,9 +606,9 @@ function changeCaseRunAssignee() {
 function serializeCaseRunFromInputList(table, name) {
   var elements;
   if (typeof table === 'string') {
-    elements = jQ('#' + table).parent().find('input[name="case_run"]:checked');
+    elements = jQ('#' + table).parent().find('input[name="execution"]:checked');
   } else {
-    elements = jQ(table).parent().find('input[name="case_run"]:checked');
+    elements = jQ(table).parent().find('input[name="execution"]:checked');
   }
 
   var returnobj_list = [];
@@ -796,17 +796,6 @@ function initialize_addlink_dialog() {
 }
 
 
-/*
- * Toggle TestExecution panel to edit a case run in run page.
- *
- * Arguments:
- * options.casrunContainer:
- * options.expandPaneContainer:
- * options.caseId:
- * options.caserunId:
- * options.caseTextVersion:
- * options.callback:
- */
 function toggleTestExecutionPane(options) {
   var container = options.caserunRowContainer;
   var content_container = options.expandPaneContainer;
@@ -816,7 +805,7 @@ function toggleTestExecutionPane(options) {
 
   if (content_container.find('.ajax_loading').length) {
     var url = '/case/' + options.caseId + '/execution-detail-pane/';
-    var data = { case_run_id: options.caserunId, case_text_version: options.caseTextVersion };
+    var data = { execution_id: options.executionId, case_text_version: options.caseTextVersion };
 
     jQ.get(url, data, function(data, textStatus) {
       content_container.html(data);
