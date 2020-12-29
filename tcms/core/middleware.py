@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.sites.models import Site
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.migrations.executor import MigrationExecutor
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.safestring import mark_safe
@@ -14,7 +15,11 @@ from django.utils.translation import gettext_lazy as _
 class CheckSettingsMiddleware(MiddlewareMixin):
     def process_request(self, request):
         doc_url = "https://kiwitcms.readthedocs.io/en/latest/admin.html#configure-kiwi-s-base-url"
-        site = Site.objects.get(pk=settings.SITE_ID)
+        try:
+            site = Site.objects.get(pk=settings.SITE_ID)
+        except:
+            # Redirect to Setup view
+            return HttpResponseRedirect(reverse("setup"))
 
         if site.domain == "127.0.0.1:8000":
             messages.add_message(

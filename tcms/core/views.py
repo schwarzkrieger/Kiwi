@@ -65,6 +65,8 @@ def server_error(request):  # pylint: disable=missing-permission-required
     template = loader.get_template("500.html")
     return http.HttpResponseServerError(template.render({}, request))
 
+class SetupView(TemplateView):
+    pass
 
 class TranslationMode(View):  # pylint: disable=missing-permission-required
     """
