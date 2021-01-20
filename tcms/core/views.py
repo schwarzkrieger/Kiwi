@@ -2,7 +2,9 @@
 from django import http
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.core.management import call_command
 from django.db.models import Count, Q
+from django.shortcuts import render
 from django.template import loader
 from django.utils import translation
 from django.utils.decorators import method_decorator
@@ -10,6 +12,9 @@ from django.utils.translation import trans_real
 from django.views import i18n
 from django.views.decorators.csrf import requires_csrf_token
 from django.views.generic.base import TemplateView, View
+from django.db.migrations.executor import MigrationExecutor
+from django.db import DEFAULT_DB_ALIAS, connections
+
 
 from tcms.testplans.models import TestPlan
 from tcms.testruns.models import TestRun
@@ -68,11 +73,23 @@ def server_error(request):  # pylint: disable=missing-permission-required
 
 class SetupView(TemplateView):
 
-    template_name = "dashboard.html"
+    template_name = "setup.html"
 
-    def websetup(self):
-        return None
+    def post(self, request, **kwargs):
+        for btn in request.POST:
+            if btn == "perform_migrations":
+                call_command("migrate")
+        context = super(SetupView, self).get_context_data(**kwargs)
+        return render(request, self.template_name, context)
 
+    def get_context_data(self, **kwargs):
+        executor = MigrationExecutor(connections[DEFAULT_DB_ALIAS])
+        plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
+        # Check for existing superuser - not implemented yet
+        # Check if domain name is set - not implemented yet
+        return {
+            "migrations_needed" : bool(plan),
+        }
 
 class TranslationMode(View):  # pylint: disable=missing-permission-required
     """

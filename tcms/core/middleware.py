@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.sites.models import Site
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.migrations.executor import MigrationExecutor
+from django.db.utils import OperationalError
 from django.http import HttpResponseRedirect
 from django.urls import resolve, reverse
 from django.utils.deprecation import MiddlewareMixin
@@ -18,7 +19,7 @@ class CheckSettingsMiddleware(MiddlewareMixin):
             doc_url = "https://kiwitcms.readthedocs.io/en/latest/admin.html#configure-kiwi-s-base-url"
             try:
                 site = Site.objects.get(pk=settings.SITE_ID)
-            except:
+            except OperationalError:
                 # Redirect to Setup view
                 return HttpResponseRedirect(reverse("setup"))
 
