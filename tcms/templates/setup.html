@@ -15,22 +15,37 @@
                         <span class="card-pf-aggregate-status-count">
                             Migrations
                         </span>
+                        <br>
         {% if migrations_needed %}
                         It seems your database misses an important migrations!
         We'll try to apply them. In case of error, please, consult the corresponding logs.
                     <form action="{% url 'setup' %}" method="post">
-{% csrf_token %}
-
- <button type="submit" name='perform_migrations' value="yes">Next -></button>
- </form>
+                        {% csrf_token %}
+                        <br>
+                        <button type="submit" name='perform_migrations' class='btn btn-info btn-lg'
+            data-loading-text=" Please wait... <span class='spinner spinner-xs spinner-inline'></span>" value="yes">
+            Start migrations</button>
+                        <script>
+                        $(document).ready(function(){
+                            $(".btn").click(function(){
+                                $(this).button('loading');
+                            });
+                        });
+                        </script>
+                    </form>
                         {% else %}
                         All migrations are applied.
                         {% endif %}
-</h2>
+                    </h2>
                     <div class="card-pf-body">
                         <p class="card-pf-aggregate-status-notifications">
                             <span class="card-pf-aggregate-status-notification">
-                                <span class="pficon pficon-error-circle-o"></span>
+                                <span class="pficon
+                                {% if migrations_needed %}
+                                pficon-error-circle-o
+                                {% else %}
+                                pficon-ok
+                                {% endif %}"></span>
                             </span>
                         </p>
                     </div>

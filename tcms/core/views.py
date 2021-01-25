@@ -4,8 +4,9 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.management import call_command
 from django.db.models import Count, Q
-from django.shortcuts import render
+from django.http import HttpResponseRedirect
 from django.template import loader
+from django.urls import reverse
 from django.utils import translation
 from django.utils.decorators import method_decorator
 from django.utils.translation import trans_real
@@ -75,21 +76,26 @@ class SetupView(TemplateView):
 
     template_name = "setup.html"
 
-    def post(self, request, **kwargs):
-        for btn in request.POST:
-            if btn == "perform_migrations":
-                call_command("migrate")
-        context = super(SetupView, self).get_context_data(**kwargs)
-        return render(request, self.template_name, context)
-
     def get_context_data(self, **kwargs):
+        # Check for non-applied migrations
         executor = MigrationExecutor(connections[DEFAULT_DB_ALIAS])
         plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
+        for btn in self.request.GET:
+            if btn == "perform_migrations" and self.request.GET[btn] == "yes" and plan:
+                call_command("migrate")
         # Check for existing superuser - not implemented yet
         # Check if domain name is set - not implemented yet
         return {
             "migrations_needed" : bool(plan),
         }
+
+    def post(self, request):
+        for btn in request.POST:
+            # Perform migrations
+            if btn == "perform_migrations":
+                call_command("migrate")
+        return HttpResponseRedirect(reverse("setup"))
+
 
 class TranslationMode(View):  # pylint: disable=missing-permission-required
     """
