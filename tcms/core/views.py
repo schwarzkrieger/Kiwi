@@ -13,8 +13,6 @@ from django.utils.translation import trans_real
 from django.views import i18n
 from django.views.decorators.csrf import requires_csrf_token
 from django.views.generic.base import TemplateView, View
-from django.db.migrations.executor import MigrationExecutor
-from django.db import DEFAULT_DB_ALIAS, connections
 
 
 from tcms.testplans.models import TestPlan
@@ -76,24 +74,10 @@ class SetupView(TemplateView):
 
     template_name = "setup.html"
 
-    def get_context_data(self, **kwargs):
-        # Check for non-applied migrations
-        executor = MigrationExecutor(connections[DEFAULT_DB_ALIAS])
-        plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
-        for btn in self.request.GET:
-            if btn == "perform_migrations" and self.request.GET[btn] == "yes" and plan:
-                call_command("migrate")
-        # Check for existing superuser - not implemented yet
-        # Check if domain name is set - not implemented yet
-        return {
-            "migrations_needed" : bool(plan),
-        }
-
     def post(self, request):
-        for btn in request.POST:
+        if "perform_migrations" in request.POST:
             # Perform migrations
-            if btn == "perform_migrations":
-                call_command("migrate")
+            call_command("migrate")
         return HttpResponseRedirect(reverse("setup"))
 
 

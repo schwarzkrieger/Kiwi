@@ -16,8 +16,7 @@
                             Migrations
                         </span>
                         <br>
-        {% if migrations_needed %}
-                        It seems your database misses an important migrations!
+                        Your database may need important migrations to be applied!
         We'll try to apply them. In case of error, please, consult the corresponding logs.
                     <form action="{% url 'setup' %}" method="post">
                         {% csrf_token %}
@@ -33,82 +32,13 @@
                         });
                         </script>
                     </form>
-                        {% else %}
-                        All migrations are applied.
-                        {% endif %}
                     </h2>
                     <div class="card-pf-body">
                         <p class="card-pf-aggregate-status-notifications">
                             <span class="card-pf-aggregate-status-notification">
                                 <span class="pficon
-                                {% if migrations_needed %}
-                                pficon-error-circle-o
-                                {% else %}
-                                pficon-ok
-                                {% endif %}"></span>
-                            </span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div><!-- /row -->
-
-               <div class="row row-cards-pf">
-            <div class="col-sm-12 col-md-12 col-lg-12">
-                <div class="card-pf card-pf-accented card-pf-aggregate-status card-pf-aggregate-status-mini">
-                    <h2 class="card-pf-title">
-                        <span class="fa fa-paper-plane"></span>
-                        <span class="card-pf-aggregate-status-count">
-                            Superuser
-                        </span>
-        {% if superuser_missing %}
-                        You need to create a Superuser.
-                    <form action="{% url 'setup' %}" method="post">
-{% csrf_token %}
-
- <button type="submit" name='create_superuser' value="yes">Next -></button>
- </form>
-                        {% elif migrations_needed %}
-                        Not ready for this step yet.
-                        {% else %}
-                        At least one superuser exists. If you need another please use the admin page.
-                        {% endif %}
-</h2>
-                    <div class="card-pf-body">
-                        <p class="card-pf-aggregate-status-notifications">
-                            <span class="card-pf-aggregate-status-notification">
-                                <span class="pficon pficon-error-circle-o"></span>
-                            </span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div><!-- /row -->
-
-                       <div class="row row-cards-pf">
-            <div class="col-sm-12 col-md-12 col-lg-12">
-                <div class="card-pf card-pf-accented card-pf-aggregate-status card-pf-aggregate-status-mini">
-                    <h2 class="card-pf-title">
-                        <span class="fa fa-paper-plane"></span>
-                        <span class="card-pf-aggregate-status-count">
-                            Domain name
-                        </span>
-        {% if domain_not_set %}
-                        Please set the domain name
-                        Not yet implemented
-                        <form action="{% url 'setup' %}" method="post">
-{% csrf_token %}
-
- <button type="submit" name='perform_migrations' value="yes">Next -></button>
- </form>
-                        {% else %}
-                        Domain name is set.
-                        {% endif %}
-</h2>
-                    <div class="card-pf-body">
-                        <p class="card-pf-aggregate-status-notifications">
-                            <span class="card-pf-aggregate-status-notification">
-                                <span class="pficon pficon-error-circle-o"></span>
+                                pficon-error-circle-o>
+                                </span>
                             </span>
                         </p>
                     </div>

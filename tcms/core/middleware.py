@@ -13,16 +13,24 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 
+class CheckDBStructureExistsMiddleware(MiddlewareMixin):
+    def process_request(self, request):
+        if request.path == "/setup/":
+            return None
+        try:
+            Site.objects.get(pk=settings.SITE_ID)
+        except (OperationalError, ProgrammingError):
+            # Redirect to Setup view
+            return HttpResponseRedirect(reverse("setup"))
+        return None
+
+
 class CheckSettingsMiddleware(MiddlewareMixin):
     def process_request(self, request):
         doc_url = "https://kiwitcms.readthedocs.io/en/latest/admin.html#configure-kiwi-s-base-url"
         if request.path == "/setup/":
-            return None
-        try:
-            site = Site.objects.get(pk=settings.SITE_ID)
-        except (OperationalError, ProgrammingError):
-            # Redirect to Setup view
-            return HttpResponseRedirect(reverse("setup"))
+            return
+        site = Site.objects.get(pk=settings.SITE_ID)
 
         if site.domain == "127.0.0.1:8000":
             messages.add_message(
@@ -40,7 +48,6 @@ class CheckSettingsMiddleware(MiddlewareMixin):
                     }
                 ),
             )
-        return None
 
 
 class CheckUnappliedMigrationsMiddleware(MiddlewareMixin):
